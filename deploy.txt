@@ -1,0 +1,7 @@
+install ebs cli: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html
+
+eb init - creates an ebs application
+eb create - creates an ebs environment
+There is a diference between application and environment!
+
+https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_nodejs_express.html
