@@ -60,6 +60,7 @@ app.post("/requests", async (req, res) => {
     lang: userLang,
   };
   const existingToken = req.query["ch-id"] || req.cookies["ch-id"] || null;
+  const disableCookie = req.query["disableCookie"] && req.query["disableCookie"] === 'true' ? true : false
   let result;
   try {
     if (existingToken) {
@@ -88,20 +89,20 @@ app.post("/requests", async (req, res) => {
   // Now handle the queue-ing
   const cookie = result.token || null;
   if (result && result.promoted) {
-    if (cookie) {
+    if (cookie && !disableCookie) {
       res.cookie('ch-id', cookie, { expires: new Date(Date.now() + 3600000) }) // cookie will be removed after 1 hours
     }
-    res.json({ status: "pass" });
+    res.json({ status: "pass", token: cookie });
   } else {
     let redirectUrl = `https://wait.crowdhandler.com/${result.slug}?url=${targetUrl}`;
     if (existingToken) {
       redirectUrl = `${redirectUrl}&ch-id=${existingToken}`;
     }
     const encoded = encodeURI(redirectUrl);
-    if (cookie) {
+    if (cookie && !disableCookie) {
       res.cookie('ch-id', cookie, { expires: new Date(Date.now() + 3600000) }) // cookie will be removed after 1 hours
     }
-    res.json({ url: encoded, status: "redirect" });
+    res.json({ url: encoded, status: "redirect", token: cookie });
   }
 });
 
