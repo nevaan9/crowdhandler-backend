@@ -4,7 +4,20 @@ const axios = require("axios");
 const express = require("express");
 const app = express();
 // REST API
-app.use(cors());
+var allowedDomains = ['https://dev.veoci.com', 'https://stage.veoci.com', 'https://veoci.com', 'http://localhost:8081'];
+app.use(cors({
+  origin: function (origin, callback) {
+    // bypass the requests with no origin (like curl requests, mobile apps, etc )
+    if (!origin) return callback(null, true);
+
+    if (allowedDomains.indexOf(origin) === -1) {
+      var msg = `This site ${origin} does not have an access. Only specific domains are allowed to access it.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -73,7 +86,7 @@ app.post("/requests", async (req, res) => {
     return;
   }
   // Now handle the queue-ing
-  const cookie = existingToken || result.token || null;
+  const cookie = result.token || null;
   if (result && result.promoted) {
     if (cookie) {
       res.cookie('ch-id', cookie, { expires: new Date(Date.now() + 3600000) }) // cookie will be removed after 1 hours
