@@ -75,14 +75,20 @@ app.post("/requests", async (req, res) => {
   // Now handle the queue-ing
   const cookie = existingToken || result.token || null;
   if (result && result.promoted) {
-    res.json({ status: "pass", cookie });
+    if (cookie) {
+      res.cookie('ch-id', cookie, { expires: new Date(Date.now() + 3600000) }) // cookie will be removed after 1 hours
+    }
+    res.json({ status: "pass" });
   } else {
     let redirectUrl = `https://wait.crowdhandler.com/${result.slug}?url=${targetUrl}`;
     if (existingToken) {
       redirectUrl = `${redirectUrl}&ch-id=${existingToken}`;
     }
     const encoded = encodeURI(redirectUrl);
-    res.json({ url: encoded, status: "redirect", cookie });
+    if (cookie) {
+      res.cookie('ch-id', cookie, { expires: new Date(Date.now() + 3600000) }) // cookie will be removed after 1 hours
+    }
+    res.json({ url: encoded, status: "redirect" });
   }
 });
 
